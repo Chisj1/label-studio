@@ -78,6 +78,7 @@ if not logging.getLogger().hasHandlers():
 
 from label_studio.core.utils.io import get_data_dir
 from label_studio.core.utils.params import get_bool_env, get_env
+from label_studio.core.settings import ldap as ldap_settings
 
 logger = logging.getLogger(__name__)
 SILENCED_SYSTEM_CHECKS = []
@@ -296,10 +297,18 @@ ALLOWED_HOSTS = get_env_list('ALLOWED_HOSTS', default=['*'])
 
 # Auth modules
 AUTH_USER_MODEL = 'users.User'
+AUTH_LDAP_ENABLED = ldap_settings.AUTH_LDAP_ENABLED
+AUTH_LDAP_SERVER_URI = ldap_settings.AUTH_LDAP_SERVER_URI
+AUTH_LDAP_BIND_DN = ldap_settings.AUTH_LDAP_BIND_DN
+AUTH_LDAP_BIND_PASSWORD = ldap_settings.AUTH_LDAP_BIND_PASSWORD
+AUTH_LDAP_CONNECTION_OPTIONS = ldap_settings.AUTH_LDAP_CONNECTION_OPTIONS
+
 AUTHENTICATION_BACKENDS = [
     'rules.permissions.ObjectPermissionBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
+if AUTH_LDAP_ENABLED:
+    AUTHENTICATION_BACKENDS.append('django_auth_ldap.backend.LDAPBackend')
 USE_USERNAME_FOR_LOGIN = False
 
 DISABLE_SIGNUP_WITHOUT_LINK = get_bool_env('DISABLE_SIGNUP_WITHOUT_LINK', False)

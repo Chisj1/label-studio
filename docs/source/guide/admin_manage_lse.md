@@ -43,7 +43,15 @@ If you invite users using the [invite link option](admin_user#Invite-users-to-La
 
 To programmatically activate and assign roles to users, you can use the API. 
 
-For a given user ID and a given organization ID, you can programmatically assign a role to a user by sending a POST request to the `/api/organizations/{id}/memberships` endpoint. See the [Organizations API documentation](/api/#tag/Organizations/operation/api_organizations_memberships_partial_update).
+For a given user ID and organization ID, you can programmatically assign a role by sending a PATCH request to the `/api/organizations/{id}/memberships/{user_id}/` endpoint with a body similar to:
+
+```json
+{
+  "role": "Manager"
+}
+```
+
+For clients that do not support PATCH, the same payload can be sent with a POST request. See the [Organizations API documentation](/api/#tag/Organizations/operation/api_organizations_membership_update) for more details.
 
 #### Determine the organization ID or user ID
 

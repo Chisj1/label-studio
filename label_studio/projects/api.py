@@ -8,6 +8,7 @@ from core.filters import ListFilter
 from core.label_config import config_essential_data_has_changed
 from core.mixins import GetParentObjectMixin
 from core.permissions import ViewClassPermission, all_permissions
+from core.api_permissions import RolePermission
 from core.redis import start_job_async_or_sync
 from core.utils.common import paginator, paginator_help, temporary_disconnect_all_signals
 from core.utils.exceptions import LabelStudioDatabaseException, ProjectExistException
@@ -622,6 +623,8 @@ class ProjectSummaryResetAPI(GetParentObjectMixin, generics.CreateAPIView):
     permission_required = ViewClassPermission(
         POST=all_permissions.projects_change,
     )
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [RolePermission]
+    required_roles = {'project': ['owner']}
 
     @extend_schema(exclude=True)
     def post(self, *args, **kwargs):
@@ -659,11 +662,12 @@ class ProjectSummaryResetAPI(GetParentObjectMixin, generics.CreateAPIView):
 )
 class ProjectImportAPI(generics.RetrieveAPIView):
     permission_required = all_permissions.projects_change
-    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ProjectImportPermission]
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ProjectImportPermission, RolePermission]
     parser_classes = (JSONParser,)
     serializer_class = ProjectImportSerializer
     queryset = ProjectImport.objects.all()
     lookup_url_kwarg = 'import_pk'
+    required_roles = {'project': ['owner']}
 
 
 @method_decorator(
@@ -687,11 +691,12 @@ class ProjectImportAPI(generics.RetrieveAPIView):
 )
 class ProjectReimportAPI(generics.RetrieveAPIView):
     permission_required = all_permissions.projects_change
-    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ProjectImportPermission]
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [ProjectImportPermission, RolePermission]
     parser_classes = (JSONParser,)
     serializer_class = ProjectReimportSerializer
     queryset = ProjectReimport.objects.all()
     lookup_url_kwarg = 'reimport_pk'
+    required_roles = {'project': ['owner']}
 
 
 @method_decorator(

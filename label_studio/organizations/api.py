@@ -33,6 +33,7 @@ from tasks.models import Annotation
 from users.models import User
 
 from label_studio.core.permissions import ViewClassPermission, all_permissions
+from label_studio.core.api_permissions import RolePermission
 from label_studio.core.utils.params import bool_from_request
 
 logger = logging.getLogger(__name__)
@@ -252,12 +253,13 @@ class OrganizationMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroy
     parser_classes = (JSONParser, FormParser, MultiPartParser)
     serializer_class = OrganizationMemberSerializer
     http_method_names = ['delete', 'get']
+    required_roles = {'organization': ['owner']}
 
     @property
     def permission_classes(self):
         if self.request.method == 'DELETE':
-            return [IsAuthenticated, HasObjectPermission]
-        return api_settings.DEFAULT_PERMISSION_CLASSES
+            return [IsAuthenticated, HasObjectPermission, RolePermission]
+        return api_settings.DEFAULT_PERMISSION_CLASSES + [RolePermission]
 
     def get_queryset(self):
         return OrganizationMember.objects.filter(organization=self.parent_object)
@@ -325,6 +327,8 @@ class OrganizationAPI(generics.RetrieveUpdateAPIView):
     queryset = Organization.objects.all()
     permission_required = all_permissions.organizations_change
     serializer_class = OrganizationSerializer
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [RolePermission]
+    required_roles = {'organization': ['owner']}
 
     redirect_route = 'organizations-dashboard'
     redirect_kwarg = 'pk'

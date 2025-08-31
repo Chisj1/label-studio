@@ -302,6 +302,11 @@ AUTHENTICATION_BACKENDS = [
 ]
 USE_USERNAME_FOR_LOGIN = False
 
+AUTH_LDAP_ENABLED = get_bool_env('AUTH_LDAP_ENABLED', False)
+if AUTH_LDAP_ENABLED:
+    from .ldap import *  # noqa: F401,F403
+    AUTHENTICATION_BACKENDS.insert(0, 'django_auth_ldap.backend.LDAPBackend')
+
 DISABLE_SIGNUP_WITHOUT_LINK = get_bool_env('DISABLE_SIGNUP_WITHOUT_LINK', False)
 
 # Password validation settings

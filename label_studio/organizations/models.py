@@ -25,6 +25,16 @@ class OrganizationMember(OrganizationMemberMixin, models.Model):
         'organizations.Organization', on_delete=models.CASCADE, help_text='Organization ID'
     )
 
+    class Role(models.TextChoices):
+        MEMBER = 'member', _('Member')
+        ADMIN = 'admin', _('Admin')
+
+    role = models.CharField(
+        max_length=16,
+        choices=Role.choices,
+        default=Role.MEMBER,
+    )
+
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
 

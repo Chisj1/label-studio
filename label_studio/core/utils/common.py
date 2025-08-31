@@ -366,7 +366,10 @@ def retry_database_locked():
 
 
 def get_app_version():
-    return importlib.metadata.version('label-studio')
+    try:
+        return importlib.metadata.version('label-studio')
+    except importlib.metadata.PackageNotFoundError:
+        return '0.0.0'
 
 
 def get_latest_version():

@@ -129,6 +129,21 @@ When submitting pull requests for code changes, please use the following standar
 - For documentation pull requests, verify that the change is correctly rendered in the automatically generated preview.
 - Label Studio backend code should be compatible with sqlite and postgresql databases. Our automated tests will run against both sqlite and postgresql-equipped environments, but please use database backend specific features with care.
 
+
+### Migrations and setup
+
+Run database migrations and collect static files before starting the server or running tests:
+
+```bash
+python label_studio/manage.py migrate
+python label_studio/manage.py collectstatic
+```
+
+If you modify models, create new migrations with:
+
+```bash
+python label_studio/manage.py makemigrations
+```
 ### Additional questions
 
 If you have any questions that aren't answered in these guidelines, please find us in the #contributor channel of the [Label Studio Slack Community](https://slack.labelstud.io/?source=github-contrib).

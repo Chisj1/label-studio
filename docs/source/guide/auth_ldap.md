@@ -17,13 +17,23 @@ Set up LDAP authentication to manage access to Label Studio.
     LDAP authentication is only available in Label Studio Enterprise Edition and is only available for on-prem installations. If you're using Label Studio Community Edition, see <a href="https://labelstud.io/guide/label_studio_compare.html">Label Studio Features</a> to learn more.
 
 
-To more easily [manage access to Label Studio Enterprise](manage_users.html), you can map LDAP groups to both `roles` or `workspaces`. 
+To more easily [manage access to Label Studio Enterprise](manage_users.html), you can map LDAP groups to both `roles` or `workspaces`.
 
-## Set up LDAP authentication 
+## Set up LDAP authentication
 
 After you set up LDAP authentication, you can no longer use native authentication to log in to the Label Studio UI. Set up LDAP authentication and assign LDAP users to your Label Studio Enterprise organization using environment variables in Docker. 
 
-You can also map specific LDAP groups to specific organization roles and workspaces in Label Studio Enterprise, making it easier to set up and manage role-based access control (RBAC) and project access in Label Studio Enterprise. 
+You can also map specific LDAP groups to specific organization roles and workspaces in Label Studio Enterprise, making it easier to set up and manage role-based access control (RBAC) and project access in Label Studio Enterprise.
+
+Follow these steps to enable LDAP authentication:
+
+1. **Enable LDAP** – set `AUTH_LDAP_ENABLED=1` and restart the application.
+2. **Provide connection details** – configure `AUTH_LDAP_SERVER_URI`, `AUTH_LDAP_BIND_DN`, and `AUTH_LDAP_BIND_PASSWORD` for your directory.
+3. **Choose a user lookup strategy** – either set `AUTH_LDAP_USER_DN_TEMPLATE` for simple lookups or use `AUTH_LDAP_USER_SEARCH_BASES` for recursive group scans.
+4. **Map groups to roles or workspaces** – use the `AUTH_LDAP_ORGANIZATION_ROLE_*` variables and `AUTH_LDAP_ORGANIZATION_WORKSPACES` to control access within Label Studio.
+5. **Allow username login** – set `USE_USERNAME_FOR_LOGIN=1` so LDAP users can log in with usernames as well as emails.
+
+LDAP settings are ignored in the Community Edition; only the Enterprise Edition evaluates the variables below.
 
 You can refer to this example environment variable file for your own LDAP setup:
 
@@ -63,6 +73,22 @@ AUTH_LDAP_GROUP_SEARCH_BASE_DN=ou=Users,o=group-id,dc=example,dc=com
 AUTH_LDAP_GROUP_SEARCH_FILTER_STR=(objectClass=groupOfNames)
 AUTH_LDAP_GROUP_TYPE=ou
 ```
+
+### Environment variable reference
+
+| Variable | Description |
+| --- | --- |
+| `AUTH_LDAP_ENABLED` | Turns LDAP authentication on. Ignored in Community Edition. |
+| `AUTH_LDAP_SERVER_URI` | URI of the LDAP server, for example `ldaps://ldap.example.com`. |
+| `AUTH_LDAP_BIND_DN` / `AUTH_LDAP_BIND_PASSWORD` | Credentials used to bind to the LDAP server. |
+| `AUTH_LDAP_USER_DN_TEMPLATE` | Template for constructing a user DN during authentication. |
+| `AUTH_LDAP_USER_SEARCH_BASES` | Semicolon-separated list of groups to search when using recursive lookup. |
+| `AUTH_LDAP_ORGANIZATION_OWNER_EMAIL` | Existing Label Studio user who becomes the organization owner for imported users. |
+| `AUTH_LDAP_USER_ATTR_MAP_*` | Maps LDAP attributes to Label Studio fields such as first name, last name, email, or username. |
+| `AUTH_LDAP_GROUP_SEARCH_BASE_DN` | Base DN used when searching for LDAP groups. |
+| `AUTH_LDAP_GROUP_SEARCH_FILTER_STR` | LDAP filter used to select group entries. |
+| `AUTH_LDAP_GROUP_TYPE` | Type of LDAP groups. |
+| `USE_USERNAME_FOR_LOGIN` | Allows users to log in with usernames. Required for LDAP setups. |
 
 If you want to use a recursive scan to search in several LDAP groups to grant access to Label Studio, instead of relying on the simple search used by `AUTH_LDAP_USER_ON_TEMPLATE`, update your environment variables file like the following:
 ```bash
@@ -117,3 +143,10 @@ AUTH_LDAP_CONNECTION_OPTIONS="OPT_X_TLS_CACERTFILE=/path/to/cert.crt;OPT_X_TLS_N
 ```
 
 Where `OPT_X_TLS_CACERTFILE` points to a file with certificates. If you’re using self-signed certificates, you’ll need to add `OPT_X_TLS_NEWCTX=0` as the last entry of the `AUTH_LDAP_CONNECTION_OPTIONS` env variable.
+
+## Troubleshooting
+
+* **Connection refused** – verify `AUTH_LDAP_SERVER_URI` and network access to the LDAP host.
+* **Invalid credentials** – confirm `AUTH_LDAP_BIND_DN` and `AUTH_LDAP_BIND_PASSWORD` match your directory settings.
+* **Group mappings not applied** – ensure users belong to the groups specified in `AUTH_LDAP_ORGANIZATION_ROLE_*` and that the group DNs are correct.
+* **Username login fails** – make sure `USE_USERNAME_FOR_LOGIN=1` and that the username attribute is mapped with `AUTH_LDAP_USER_ATTR_MAP_USERNAME`.
